@@ -111,4 +111,12 @@ router.get('/modpack/:slug/:build', (req, res) => {
   // })
 })
 
+/* Invalid API Routes */
+router.all('*', (req, res) => {
+  res.status(405).json({
+    "code": res.statusCode,
+    "message": "Invalid route."
+  })
+})
+
 module.exports = router
