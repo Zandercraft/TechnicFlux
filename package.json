@@ -1,0 +1,47 @@
+{
+  "name": "technicflux",
+  "prettyName": "TechnicFlux",
+  "description": "A feature-rich and easy-to-use implementation of Technic's Solder API using Node.js.",
+  "author": {
+    "name": "Zandercraft",
+    "email": "support@zandercraft.ca",
+    "url": "https://zandercraft.ca/"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Zandercraft/TechnicFlux/issues",
+    "email": "support@zandercraft.ca"
+  },
+  "homepage": "https://github.com/Zandercraft/TechnicFlux/",
+  "keywords": [
+    "technic",
+    "solder",
+    "technicsolder",
+    "flux",
+    "technicflux",
+    "minecraft",
+    "modding",
+    "zandercraft",
+    "modpacks",
+    "mods",
+    "vcs",
+    "versioning",
+    "dashboard",
+    "api"
+  ],
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node ./bin/www"
+  },
+  "dependencies": {
+    "cookie-parser": "~1.4.4",
+    "current-git-branch": "^1.1.0",
+    "debug": "~4.3.4",
+    "express": "~4.16.1",
+    "hbs": "~4.2.0",
+    "http-errors": "~1.6.3",
+    "morgan": "~1.9.1",
+    "standard": "^17.1.0"
+  }
+}
