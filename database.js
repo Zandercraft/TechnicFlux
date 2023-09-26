@@ -1,3 +1,4 @@
+const debug = require('debug')('technicflux:server');
 const mongoose = require('mongoose')
 const { SchemaTypes } = require('mongoose')
 const bcrypt = require('bcryptjs')
@@ -56,7 +57,9 @@ const Build = mongoose.model('technicflux_builds', buildSchema)
 // --- Functions ---
 
 exports.connectToDB = (connectionString) => {
+  debug("Connecting to MongoDB database...")
   mongoose.connect(connectionString)
+  debug("Connected to database.")
 }
 
 // --- User-Related Functions ---
@@ -223,9 +226,98 @@ exports.updateUser = (u_username, object) => {
 }
 
 // --- Modpack-Related Functions ---
+exports.createModpack = (m_slug, m_display_name, m_owner) => {
+  // Create a modpack object
+  const newModpack = new Modpack({
+    name: m_slug,
+    display_name: m_display_name,
+    owners: [m_owner]
+  })
 
+  // Commit it to the database
+  return newModpack.save().then((modpack) => {
+    // Modpack successfully created
+    debug(`Successfully added new project ${modpack.display_name}: ${modpack.name}\n`)
+    return modpack
+  }).catch((reason) => {
+    // Modpack failed to create
+    debug(`ERROR (DB: when saving new modpack): ${reason}\n`)
+    return false
+  })
+}
+
+exports.getModpackBySlug = (m_slug) => {
+  return Modpack.findOne({ name: m_slug }).populate('owners').populate('collaborators').exec().then((modpack) => {
+    // Modpack found
+    return modpack
+  }).catch((reason) => {
+    // No modpack found with this slug
+    debug(`ERROR (DB): Failed to find a modpack with this slug because of: ${reason}`)
+    return false
+  })
+}
+
+exports.getModpacksByOwner = (m_owner) => {
+  return Modpack.find({ owners: m_owner }).populate('owners').populate('collaborators').exec().then((modpacks) => {
+    // Modpacks found.
+    return modpacks
+  }).catch((reason) => {
+    // No modpacks found for this owner.
+    debug(`ERROR (DB): Failed to find any modpacks with this owner because of: ${reason}`)
+    return false
+  })
+}
+
+exports.getModpacksByCollaborator = (m_collaborator) => {
+  return Modpack.find({ collaborators: m_collaborator }).populate('owners').populate('collaborators').exec().then((modpacks) => {
+    // Modpacks found.
+    return modpacks
+  }).catch((reason) => {
+    // No modpacks found for this collaborator.
+    debug(`ERROR (DB): Failed to find any modpacks with this collaborator because of: ${reason}`)
+    return false
+  })
+}
+
+exports.getAllModpacks = () => {
+  // Fetch an array of all modpacks
+  return Modpack.find({}).populate('owners').populate('collaborators').exec().then((modpacks) => {
+    // Modpacks found
+    return modpacks
+  }).catch((reason) => {
+    // Failed to get any modpacks.
+    debug(`ERROR (DB): Failed to fetch any modpacks because of: ${reason}`)
+    return false
+  })
+}
+
+exports.updateModpack = (m_slug, m_object) => {
+  return Modpack.updateOne(
+    { name: m_slug },
+    { $set: m_object }
+  ).exec().then(() => {
+    // Successfully updated the modpack
+    return true
+  }).catch((reason) => {
+    // Failed to update the modpack
+    debug(`ERROR (DB): Failed to update modpack '${m_slug}' because of: ${reason}`)
+    return false
+  })
+}
+
+exports.deleteModpack = (m_slug) => {
+  return Modpack.deleteOne({ name: m_slug }).exec().then(() => {
+    // Successfully deleted this modpack
+    return true
+  }).catch((reason) => {
+    // Failed to delete the modpack
+    debug(`ERROR (DB): Failed to delete modpack '${m_slug}' because of: ${reason}`)
+    return false
+  })
+}
 
 // --- Mod-Related Functions ---
+
 
 
 // --- Build-Related Functions ---
