@@ -53,12 +53,12 @@ router.get('/mod/:modname/:modversion', (req, res) => {
 })
 
 router.get('/modpack', (req, res) => {
-  // No Slug
+  // Modpack Index
   res.json({
     "modpacks": {
-      "test": "Example Modpack"
+      "slug": "Example Modpack Pretty Name"
     },
-    "mirror_url": "https://example.com/"
+    "mirror_url": `http://${process.env.HOST}/mods`
   })
 })
 

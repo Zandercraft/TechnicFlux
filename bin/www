@@ -1,25 +1,37 @@
 #!/usr/bin/env node
 
 /**
+ * Load configuration from .env
+ */
+require('dotenv').config()
+
+
+/**
  * Module dependencies.
  */
 
-var app = require('../app');
-var debug = require('debug')('technicflux:server');
-var http = require('http');
+const app = require('../app');
+const debug = require('debug')('technicflux:server');
+const http = require('http');
+const database = require('../database')
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+let port = normalizePort(process.env.PORT || '80');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+let server = http.createServer(app);
+
+/**
+ * Connect to the Database
+ */
+database.connectToDB(process.env.MONGODB_CONN_STRING)
 
 /**
  * Listen on provided port, on all network interfaces.
