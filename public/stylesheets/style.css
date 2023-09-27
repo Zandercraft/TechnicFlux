@@ -1,6 +1,9 @@
 body {
-  padding: 50px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+}
+
+.pageContent {
+  padding: 50px;
 }
 
 a {

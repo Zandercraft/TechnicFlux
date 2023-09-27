@@ -10889,8 +10889,10 @@ body {
   min-width: 0;
   flex-grow: 1;
 }
-#layoutError #layoutError_footer {
-  min-width: 0;
+#layoutError_footer {
+  min-width: 100%;
+  position: absolute;
+  bottom: 0;
 }
 
 .img-error {
