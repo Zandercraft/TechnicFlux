@@ -3,7 +3,12 @@ const express = require('express')
 const path = require('path')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
+const multer = require('multer')
 
+// Setup multer disk-store
+const upload = multer({ dest: 'uploads/' })
+
+// --- Routers ---
 const indexRouter = require('./routes/index')
 const apiRouter = require('./routes/api')
 
@@ -38,4 +43,5 @@ app.use(function (err, req, res, next) {
   res.render('error', {title: `Error ${err.status}: ${err.message}`})
 })
 
-module.exports = app
+module.exports.app = app
+module.exports.upload = upload
