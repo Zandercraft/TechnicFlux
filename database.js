@@ -32,7 +32,7 @@ const modSchema = new Schema({
   pretty_name: String,
   version: String,
   mc_version: String,
-  type: String,
+  type: String, // Can be forgemod, neoforgemod, fabricmod, quiltmod, <modloadernamemod>, or modloader(handled separately)
   md5: String,
   author: String,
   description: String,
@@ -317,7 +317,88 @@ exports.deleteModpack = (m_slug) => {
 }
 
 // --- Mod-Related Functions ---
+exports.getModBySlug = (m_slug) => {
+  return Mod.findOne({ name: m_slug }).exec().then((mod) => {
+    // Mod found
+    return mod
+  }).catch((reason) => {
+    // No mod found with this slug
+    debug(`ERROR (DB): Failed to find a mod with this slug because of: ${reason}`)
+    return false
+  })
+}
 
+exports.getModsByType = (m_type) => {
+  return Mod.find({ type: m_type }).exec().then((mods) => {
+    // Mods found
+    return mods
+  }).catch((reason) => {
+    // No mods found with this modloader
+    debug(`ERROR (DB): Failed to find a mod with modloader '${m_type}' because of: ${reason}`)
+    return false
+  })
+}
+
+exports.getModsByMinecraftVersion = (m_version) => {
+  return Mod.find({ mc_version: m_version }).exec().then((mods) => {
+    // Mods found
+    return mods
+  }).catch((reason) => {
+    // No mods found with this Minecraft version.
+    debug(`ERROR (DB): Failed to find a mod with Minecraft version '${m_version}' because of: ${reason}`)
+    return false
+  })
+}
+
+exports.getModsByMinecraftAndLoaderVersion = (m_version, m_type) => {
+  return Mod.find({ mc_version: m_version, type: m_type }).exec().then((mods) => {
+    // Mods found
+    return mods
+  }).catch((reason) => {
+    // No mods found with this Minecraft and modloader version.
+    debug(`ERROR (DB): Failed to find a mod with Minecraft version '${m_version}' and modloader version '${m_type}' because of: ${reason}`)
+    return false
+  })
+}
+
+exports.getAllMods = () => {
+  return Mod.find({}).exec().then((mods) => {
+    // Mods found
+    return mods
+  }).catch((reason) => {
+    // No mods found
+    debug(`ERROR (DB): Failed to find any mods because of: ${reason}`)
+    return false
+  })
+}
+
+exports.updateMod = (m_slug, m_object) => {
+  return Mod.updateOne(
+    { name: m_slug },
+    { $set: m_object }
+  ).exec().then(() => {
+    // Successfully updated the modpack
+    return true
+  }).catch((reason) => {
+    // Failed to update the modpack
+    debug(`ERROR (DB): Failed to update modpack '${m_slug}' because of: ${reason}`)
+    return false
+  })
+}
+
+exports.deleteModpack = (m_slug) => {
+  return Modpack.deleteOne({ name: m_slug }).exec().then(() => {
+    // Successfully deleted this modpack
+    return true
+  }).catch((reason) => {
+    // Failed to delete the modpack
+    debug(`ERROR (DB): Failed to delete modpack '${m_slug}' because of: ${reason}`)
+    return false
+  })
+}
+
+
+// --- Modloader-Related Functions ---
 
 
 // --- Build-Related Functions ---
