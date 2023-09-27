@@ -97,22 +97,28 @@ router.get('/modpack/:slug/:build?', (req, res) => {
 })
 
 router.get('/verify/:key?', (req, res) => {
-  // Key validated
-  res.json({
-    valid: 'Key validated.',
-    name: 'API KEY',
-    created_at: 'A long time ago'
-  })
+  let api_key = req.params?.key
 
-  // Invalid key provided
-  // res.json({
-  //   error: 'Invalid key provided.'
-  // })
-
-  // No key provided
-  // res.json({
-  //   error: 'No API key provided.'
-  // })
+  if (api_key !== undefined) {
+    if (api_key === process.env?.API_KEY)
+      // Key validated
+      res.json({
+        valid: 'Key validated.',
+        name: 'API KEY',
+        created_at: 'A long time ago'
+      })
+    else {
+      // Invalid key provided
+      res.json({
+        error: 'Invalid key provided.'
+      })
+    }
+  } else {
+    // No key provided
+    res.json({
+      error: 'No API key provided.'
+    })
+  }
 })
 
 /* Invalid API Routes */
