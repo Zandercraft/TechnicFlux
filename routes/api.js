@@ -1,18 +1,18 @@
 const express = require('express')
 const pckg = require('../package.json')
-const branchName = require('current-git-branch');
+const branchName = require('current-git-branch')();
 const router = express.Router()
 
 router.get('/', (req, res) => {
   res.json({
     "api": pckg.prettyName,
     "version": pckg.version,
-    "stream": branchName()
+    "stream": branchName
   })
 })
 
-router.get('/mod/:modname', (req, res) => {
-  // Found
+router.get('/mod/:modname/:modversion?', (req, res) => {
+  // Found mod
   res.json({
     "id": 0,
     "name": "example",
@@ -26,14 +26,7 @@ router.get('/mod/:modname', (req, res) => {
     ]
   })
 
-  // Not Found
-  // res.status(404).json({
-  //   "error": "Mod does not exist"
-  // })
-})
-
-router.get('/mod/:modname/:modversion', (req, res) => {
-  // Found
+  // Found mod version
   res.json({
     "id": 0,
     "md5": "51c1305b56249804926e38fcf3e46640",
@@ -41,14 +34,14 @@ router.get('/mod/:modname/:modversion', (req, res) => {
     "url": "https://example.com/file.zip",
   })
 
-  // Mod Not Found
-  // res.status(404).json({
-  //   "error": "Mod does not exist"
-  // })
-
   // Version Not Found
   // res.status(404).json({
   //   "error": "Mod version does not exist"
+  // })
+
+  // Mod Not Found
+  // res.status(404).json({
+  //   "error": "Mod does not exist"
   // })
 })
 
@@ -62,7 +55,7 @@ router.get('/modpack', (req, res) => {
   })
 })
 
-router.get('/modpack/:slug', (req, res) => {
+router.get('/modpack/:slug/:build?', (req, res) => {
   // With Slug
   res.json({
     "name": "examplepack",
@@ -75,13 +68,6 @@ router.get('/modpack/:slug', (req, res) => {
     ]
   })
 
-  // Modpack Not Found
-  // res.status(404).json({
-  //   "error": "Modpack does not exist"
-  // })
-})
-
-router.get('/modpack/:slug/:build', (req, res) => {
   // Build found
   res.json({
     "minecraft": "1.20.1",
@@ -99,15 +85,33 @@ router.get('/modpack/:slug/:build', (req, res) => {
     ]
   })
 
+  // Build Not Found
+  // res.status(404).json({
+  //   "error": "Build does not exist"
+  // })
 
   // Modpack Not Found
   // res.status(404).json({
   //   "error": "Modpack does not exist"
   // })
+})
 
-  // Build Not Found
-  // res.status(404).json({
-  //   "error": "Build does not exist"
+router.get('/verify/:key?', (req, res) => {
+  // Key validated
+  res.json({
+    valid: "Key validated.",
+    name: "API KEY",
+    created_at: "A long time ago"
+  })
+
+  // Invalid key provided
+  // res.json({
+  //   error: 'Invalid key provided.'
+  // })
+
+  // No key provided
+  // res.json({
+  //   error: 'No API key provided.'
   // })
 })
 
