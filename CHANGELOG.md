@@ -25,6 +25,13 @@ Write a brief overview of the update and everything that is significant about it
 - [#14](https://github.com/Zandercraft/TechnicFlux/issues/14) -
   Short description of bug fixed based on an issue. ([ZandercraftGames](https://github.com/ZandercraftGames)).
 - Short description of bug fixed. ([ZandercraftGames](https://github.com/ZandercraftGames)).
+### Security
+- [CVE-123456](<CVE LINK>) -
+  Fixed a security vulnerability. ([ZandercraftGames](https://github.com/ZandercraftGames)).
+### Deprecated
+- [#14](https://github.com/Zandercraft/TechnicFlux/issues/14) -
+  Short description of deprecated feature based on an issue. ([ZandercraftGames](https://github.com/ZandercraftGames)).
+- Short description of deprecated feature. ([ZandercraftGames](https://github.com/ZandercraftGames)).
 ### Removed
 - [#15](https://github.com/Zandercraft/TechnicFlux/issues/15) -
   Short description of feature removed based on an issue. ([ZandercraftGames](https://github.com/ZandercraftGames)).
