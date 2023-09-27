@@ -1,4 +1,4 @@
-const debug = require('debug')('technicflux:server');
+const debug = require('debug')('technicflux:server')
 const mongoose = require('mongoose')
 const { SchemaTypes } = require('mongoose')
 const bcrypt = require('bcryptjs')
@@ -13,7 +13,7 @@ const userSchema = new Schema({
   display_name: String,
   password: String,
   created_on: Date,
-  login_history: [{timestamp: Date, userAgent: String}]
+  login_history: [{ timestamp: Date, userAgent: String }]
 })
 
 const modpackSchema = new Schema({
@@ -23,8 +23,8 @@ const modpackSchema = new Schema({
   recommended: String,
   latest: String,
   builds: [{ type: SchemaTypes.ObjectId, ref: 'technicflux_builds' }],
-  owners: [{ type:SchemaTypes.ObjectId, ref: 'technicflux_users' }],
-  contributors: [{ type:SchemaTypes.ObjectId, ref: 'technicflux_users' }]
+  owners: [{ type: SchemaTypes.ObjectId, ref: 'technicflux_users' }],
+  contributors: [{ type: SchemaTypes.ObjectId, ref: 'technicflux_users' }]
 })
 
 const modSchema = new Schema({
@@ -57,9 +57,9 @@ const Build = mongoose.model('technicflux_builds', buildSchema)
 // --- Functions ---
 
 exports.connectToDB = (connectionString) => {
-  debug("Connecting to MongoDB database...")
+  debug('Connecting to MongoDB database...')
   mongoose.connect(connectionString)
-  debug("Connected to database.")
+  debug('Connected to database.')
 }
 
 // --- User-Related Functions ---
@@ -67,14 +67,14 @@ exports.connectToDB = (connectionString) => {
 /*
  * Creates a new user with the given information.
 */
-exports.createUser = (u_username, u_display_name, u_password) => {
+exports.createUser = (uUsername, uDisplayName, uPassword) => {
   // Encrypt the password using bcrypt and save user
   return bcrypt.genSalt(10).then((Salt) => {
-    return bcrypt.hash(u_password, Salt).then((hash) => {
+    return bcrypt.hash(uPassword, Salt).then((hash) => {
       // Create a user object
       const newUser = new User({
-        username: u_username,
-        display_name: u_display_name,
+        username: uUsername,
+        display_name: uDisplayName,
         password: hash
       })
 
@@ -101,9 +101,9 @@ exports.createUser = (u_username, u_display_name, u_password) => {
 /*
  * Gets the user with the provided id.
 */
-exports.getUserById = (u_Id) => {
+exports.getUserById = (uId) => {
   // Fetch information about the user with the given id
-  return User.findOne({ _id: u_Id }).exec().then((user) => {
+  return User.findOne({ _id: uId }).exec().then((user) => {
     // User found.
     return user
   }).catch((reason) => {
@@ -116,9 +116,9 @@ exports.getUserById = (u_Id) => {
 /*
  * Gets the user with the provided email.
 */
-exports.getUserByUsername = (u_username) => {
+exports.getUserByUsername = (uUsername) => {
   // Fetch information about the user with the given username
-  return User.findOne({ username: u_username }).exec().then((user) => {
+  return User.findOne({ username: uUsername }).exec().then((user) => {
     // User found.
     return user
   }).catch((reason) => {
@@ -146,22 +146,22 @@ exports.getAllUsers = () => {
 /*
  * Checks if the corresponding password matches that of the provided username.
 */
-exports.authUser = (u_username, u_password, log_history = false, u_agent="Unknown") => {
+exports.authUser = (uUsername, uPassword, logHistory = false, uAgent = 'Unknown') => {
   // Fetch information about the user with the given username
-  return User.findOne({ username: u_username }).exec().then((user) => {
+  return User.findOne({ username: uUsername }).exec().then((user) => {
     // User found. Check password.
-    return bcrypt.compare(u_password, user.password).then((isMatch) => {
+    return bcrypt.compare(uPassword, user.password).then((isMatch) => {
       // Check if it is a match
       if (isMatch) {
         // Update the user's login history.
-        if (log_history) {
-          let newLogin = {timestamp: new Date(), userAgent: String(u_agent)}
+        if (logHistory) {
+          const newLogin = { timestamp: new Date(), userAgent: String(uAgent) }
 
           // Add the new login to the user's login history
           return User.updateOne(
-            { username: u_username },
-            { $push: {login_history: newLogin} }
-          ).exec().then(()=>{
+            { username: uUsername },
+            { $push: { login_history: newLogin } }
+          ).exec().then(() => {
             // Auth was successful and login history updated.
             user.login_history.push(newLogin)
             return [true, user]
@@ -175,7 +175,6 @@ exports.authUser = (u_username, u_password, log_history = false, u_agent="Unknow
           // Auth was successful. Return user without logging to user's history.
           return [true, user]
         }
-
       } else {
         // User's authentication was invalid.
         return [false, undefined]
@@ -191,11 +190,11 @@ exports.authUser = (u_username, u_password, log_history = false, u_agent="Unknow
 /*
  * Updates the user with the given username.
 */
-exports.updateUser = (u_username, object) => {
+exports.updateUser = (uUsername, object) => {
   return bcrypt.genSalt(10).then((Salt) => {
     return bcrypt.hash(object.password, Salt).then((hash) => {
       if (object.password.length > 0) {
-        object.password = hash;
+        object.password = hash
       } else {
         object.password = object.old_password
       }
@@ -203,7 +202,7 @@ exports.updateUser = (u_username, object) => {
 
       // Update User
       return User.updateOne(
-        { username: u_username },
+        { username: uUsername },
         { $set: object }
       ).exec().then(() => {
         // Updated user successfully
@@ -226,12 +225,12 @@ exports.updateUser = (u_username, object) => {
 }
 
 // --- Modpack-Related Functions ---
-exports.createModpack = (m_slug, m_display_name, m_owner) => {
+exports.createModpack = (mSlug, mDisplayName, mOwner) => {
   // Create a modpack object
   const newModpack = new Modpack({
-    name: m_slug,
-    display_name: m_display_name,
-    owners: [m_owner]
+    name: mSlug,
+    display_name: mDisplayName,
+    owners: [mOwner]
   })
 
   // Commit it to the database
@@ -246,8 +245,8 @@ exports.createModpack = (m_slug, m_display_name, m_owner) => {
   })
 }
 
-exports.getModpackBySlug = (m_slug) => {
-  return Modpack.findOne({ name: m_slug }).populate('owners').populate('collaborators').exec().then((modpack) => {
+exports.getModpackBySlug = (mSlug) => {
+  return Modpack.findOne({ name: mSlug }).populate('owners').populate('collaborators').exec().then((modpack) => {
     // Modpack found
     return modpack
   }).catch((reason) => {
@@ -257,8 +256,8 @@ exports.getModpackBySlug = (m_slug) => {
   })
 }
 
-exports.getModpacksByOwner = (m_owner) => {
-  return Modpack.find({ owners: m_owner }).populate('owners').populate('collaborators').exec().then((modpacks) => {
+exports.getModpacksByOwner = (mOwner) => {
+  return Modpack.find({ owners: mOwner }).populate('owners').populate('collaborators').exec().then((modpacks) => {
     // Modpacks found.
     return modpacks
   }).catch((reason) => {
@@ -268,8 +267,8 @@ exports.getModpacksByOwner = (m_owner) => {
   })
 }
 
-exports.getModpacksByCollaborator = (m_collaborator) => {
-  return Modpack.find({ collaborators: m_collaborator }).populate('owners').populate('collaborators').exec().then((modpacks) => {
+exports.getModpacksByCollaborator = (mCollaborator) => {
+  return Modpack.find({ collaborators: mCollaborator }).populate('owners').populate('collaborators').exec().then((modpacks) => {
     // Modpacks found.
     return modpacks
   }).catch((reason) => {
@@ -291,72 +290,72 @@ exports.getAllModpacks = () => {
   })
 }
 
-exports.updateModpack = (m_slug, m_object) => {
+exports.updateModpack = (mSlug, mObject) => {
   return Modpack.updateOne(
-    { name: m_slug },
-    { $set: m_object }
+    { name: mSlug },
+    { $set: mObject }
   ).exec().then(() => {
     // Successfully updated the modpack
     return true
   }).catch((reason) => {
     // Failed to update the modpack
-    debug(`ERROR (DB): Failed to update modpack '${m_slug}' because of: ${reason}`)
+    debug(`ERROR (DB): Failed to update modpack '${mSlug}' because of: ${reason}`)
     return false
   })
 }
 
-exports.deleteModpack = (m_slug) => {
-  return Modpack.deleteOne({ name: m_slug }).exec().then(() => {
+exports.deleteModpack = (mSlug) => {
+  return Modpack.deleteOne({ name: mSlug }).exec().then(() => {
     // Successfully deleted this modpack
     return true
   }).catch((reason) => {
     // Failed to delete the modpack
-    debug(`ERROR (DB): Failed to delete modpack '${m_slug}' because of: ${reason}`)
+    debug(`ERROR (DB): Failed to delete modpack '${mSlug}' because of: ${reason}`)
     return false
   })
 }
 
 // --- Mod-Related Functions ---
-exports.getModBySlug = (m_slug) => {
-  return Mod.findOne({ name: m_slug }).exec().then((mod) => {
+exports.getModBySlug = (mSlug) => {
+  return Mod.findOne({ name: mSlug }).exec().then((mod) => {
     // Mod found
     return mod
   }).catch((reason) => {
     // No mod found with this slug
-    debug(`ERROR (DB): Failed to find a mod with this slug because of: ${reason}`)
+    debug(`ERROR (DB): Failed to find a mod with slug '${mSlug}' because of: ${reason}`)
     return false
   })
 }
 
-exports.getModsByType = (m_type) => {
-  return Mod.find({ type: m_type }).exec().then((mods) => {
+exports.getModsByType = (mType) => {
+  return Mod.find({ type: mType }).exec().then((mods) => {
     // Mods found
     return mods
   }).catch((reason) => {
     // No mods found with this modloader
-    debug(`ERROR (DB): Failed to find a mod with modloader '${m_type}' because of: ${reason}`)
+    debug(`ERROR (DB): Failed to find a mod with modloader '${mType}' because of: ${reason}`)
     return false
   })
 }
 
-exports.getModsByMinecraftVersion = (m_version) => {
-  return Mod.find({ mc_version: m_version }).exec().then((mods) => {
+exports.getModsByMinecraftVersion = (mVersion) => {
+  return Mod.find({ mc_version: mVersion }).exec().then((mods) => {
     // Mods found
     return mods
   }).catch((reason) => {
     // No mods found with this Minecraft version.
-    debug(`ERROR (DB): Failed to find a mod with Minecraft version '${m_version}' because of: ${reason}`)
+    debug(`ERROR (DB): Failed to find a mod with Minecraft version '${mVersion}' because of: ${reason}`)
     return false
   })
 }
 
-exports.getModsByMinecraftAndLoaderVersion = (m_version, m_type) => {
-  return Mod.find({ mc_version: m_version, type: m_type }).exec().then((mods) => {
+exports.getModsByMinecraftAndLoaderVersion = (mVersion, mType) => {
+  return Mod.find({ mc_version: mVersion, type: mType }).exec().then((mods) => {
     // Mods found
     return mods
   }).catch((reason) => {
     // No mods found with this Minecraft and modloader version.
-    debug(`ERROR (DB): Failed to find a mod with Minecraft version '${m_version}' and modloader version '${m_type}' because of: ${reason}`)
+    debug(`ERROR (DB): Failed to find a mod with Minecraft version '${mVersion}' and modloader version '${mType}' because of: ${reason}`)
     return false
   })
 }
@@ -372,34 +371,31 @@ exports.getAllMods = () => {
   })
 }
 
-exports.updateMod = (m_slug, m_object) => {
+exports.updateMod = (mSlug, mObject) => {
   return Mod.updateOne(
-    { name: m_slug },
-    { $set: m_object }
+    { name: mSlug },
+    { $set: mObject }
   ).exec().then(() => {
     // Successfully updated the modpack
     return true
   }).catch((reason) => {
     // Failed to update the modpack
-    debug(`ERROR (DB): Failed to update modpack '${m_slug}' because of: ${reason}`)
+    debug(`ERROR (DB): Failed to update modpack '${mSlug}' because of: ${reason}`)
     return false
   })
 }
 
-exports.deleteModpack = (m_slug) => {
-  return Modpack.deleteOne({ name: m_slug }).exec().then(() => {
+exports.deleteModpack = (mSlug) => {
+  return Modpack.deleteOne({ name: mSlug }).exec().then(() => {
     // Successfully deleted this modpack
     return true
   }).catch((reason) => {
     // Failed to delete the modpack
-    debug(`ERROR (DB): Failed to delete modpack '${m_slug}' because of: ${reason}`)
+    debug(`ERROR (DB): Failed to delete modpack '${mSlug}' because of: ${reason}`)
     return false
   })
 }
 
-
 // --- Modloader-Related Functions ---
 
-
 // --- Build-Related Functions ---
-
