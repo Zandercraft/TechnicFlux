@@ -1,6 +1,7 @@
 const express = require('express')
 const pckg = require('../package.json')
 const branchName = require('current-git-branch')()
+const database = require('../database')
 const router = express.Router()
 
 router.get('/', (req, res) => {
@@ -12,88 +13,119 @@ router.get('/', (req, res) => {
 })
 
 router.get('/mod/:modname/:modversion?', (req, res) => {
-  // Found mod
-  res.json({
-    id: 0,
-    name: 'example',
-    pretty_name: 'Example',
-    author: 'ExampleAuthor',
-    description: 'This is the description',
-    link: 'https://example.com/',
-    versions: [
-      '1.20.1-0.0.1',
-      '1.20.1-0.0.2'
-    ]
+  let modName = req.params.modname
+  let modVersion = req.params?.modversion
+
+  return database.getModBySlug(`${modName}`).then((mod) => {
+    // Check if a mod was found
+    if (mod === null) {
+      // Mod Not Found
+      return res.status(404).json({
+        "error": "Mod does not exist"
+      })
+    } else if (modVersion === undefined) {
+      // Request is for the mod's info.
+      return res.json(mod)
+    } else {
+      // Request is for a particular version.
+      return database.getModVersion(modName, modVersion).then((version) => {
+        if (version === null) {
+          // Version Not Found
+          return res.status(404).json({
+            "error": "Mod version does not exist"
+          })
+        } else {
+          // Found mod version
+          return res.json({
+            id: version.mod_id,
+            md5: version.md5,
+            filesize: version.filesize,
+            url: version.url
+          })
+        }
+      }).catch(() => {
+        // Issue with db request
+        return res.status(500).json({
+          "error": "Internal Server Error"
+        })
+      })
+    }
+  }).catch(() => {
+    // Issue with db request
+    return res.status(500).json({
+      "error": "Internal Server Error"
+    })
   })
-
-  // Found mod version
-  res.json({
-    id: 0,
-    md5: '51c1305b56249804926e38fcf3e46640',
-    filesize: 0,
-    url: 'https://example.com/file.zip'
-  })
-
-  // Version Not Found
-  // res.status(404).json({
-  //   "error": "Mod version does not exist"
-  // })
-
-  // Mod Not Found
-  // res.status(404).json({
-  //   "error": "Mod does not exist"
-  // })
 })
 
 router.get('/modpack', (req, res) => {
-  // Modpack Index
-  res.json({
-    modpacks: {
-      slug: 'Example Modpack Pretty Name'
-    },
-    mirror_url: `http://${process.env.HOST}/mods`
+  return database.getAllModpacks().then((modpacks) => {
+    // Modpack Index
+    return res.json({
+      modpacks: (modpacks === null) ? {} : modpacks.reduce((obj, item) => {
+        obj[item['name']] = String(item['display_name'])
+        return obj
+      }, {}),
+      mirror_url: `http://${process.env.HOST}/mods/`
+    })
+  }).catch(() => {
+    // Issue with db request
+    return res.status(500).json({
+      "error": "Internal Server Error"
+    })
   })
 })
 
 router.get('/modpack/:slug/:build?', (req, res) => {
-  // With Slug
-  res.json({
-    name: 'examplepack',
-    display_name: 'Example Pack',
-    recommended: '0.0.1',
-    latest: '0.0.2',
-    builds: [
-      '0.0.1',
-      '0.0.2'
-    ]
+  let slug = req.params.slug
+  let build = req.params?.build
+
+  return database.getModpackBySlug(`${slug}`).then((modpack) => {
+    if (modpack === null) {
+      // Modpack Not Found
+      return res.status(404).json({
+        "error": "Modpack does not exist"
+      })
+    } else if (build === undefined) {
+      // Modpack info
+      return res.json({
+        name: modpack.name,
+        display_name: modpack.display_name,
+        recommended: modpack.recommended,
+        latest: modpack.latest,
+        builds: modpack.builds.map((build) => build['version'])
+      })
+    } else {
+      // Modpack build info
+
+      // Build found
+      return res.json({
+        minecraft: '1.20.1',
+        forge: null,
+        java: 17,
+        memory: 2048,
+        mods: [
+          {
+            name: 'examplemod',
+            version: '0.0.1',
+            md5: '51c1305b56249804926e38fcf3e46640',
+            url: 'https://example.com/file.zip',
+            filesize: 0
+          }
+        ]
+      })
+
+      // Build Not Found
+      // res.status(404).json({
+      //   "error": "Build does not exist"
+      // })
+    }
+  }).catch(() => {
+    // Issue with db request
+    return res.status(500).json({
+      "error": "Internal Server Error"
+    })
   })
-
-  // Build found
-  res.json({
-    minecraft: '1.20.1',
-    forge: null,
-    java: 17,
-    memory: 2048,
-    mods: [
-      {
-        name: 'examplemod',
-        version: '0.0.1',
-        md5: '51c1305b56249804926e38fcf3e46640',
-        url: 'https://example.com/file.zip',
-        filesize: 0
-      }
-    ]
-  })
-
-  // Build Not Found
-  // res.status(404).json({
-  //   "error": "Build does not exist"
-  // })
-
-  // Modpack Not Found
-  // res.status(404).json({
-  //   "error": "Modpack does not exist"
-  // })
 })
 
 router.get('/verify/:key?', (req, res) => {

@@ -28,6 +28,7 @@ const modpackSchema = new Schema({
 })
 
 const modSchema = new Schema({
+  mod_id: Number,
   name: String,
   pretty_name: String,
   version: String,
@@ -37,10 +38,14 @@ const modSchema = new Schema({
   author: String,
   description: String,
   link: String,
-  donate: String
+  donate: String,
+  url: String,
+  filesize: Number
 })
 
 const buildSchema = new Schema({
+  modpack: { type: SchemaTypes.ObjectId, ref: 'technicflux_modpacks' },
+  version: String,
   minecraft: String,
   java: String,
   memory: Number,
@@ -246,7 +251,7 @@ exports.createModpack = (mSlug, mDisplayName, mOwner) => {
 }
 
 exports.getModpackBySlug = (mSlug) => {
-  return Modpack.findOne({ name: mSlug }).populate('owners').populate('collaborators').exec().then((modpack) => {
+  return Modpack.findOne({ name: mSlug }).populate('owners').populate('contributors').populate('builds').exec().then((modpack) => {
     // Modpack found
     return modpack
   }).catch((reason) => {
@@ -257,7 +262,7 @@ exports.getModpackBySlug = (mSlug) => {
 }
 
 exports.getModpacksByOwner = (mOwner) => {
-  return Modpack.find({ owners: mOwner }).populate('owners').populate('collaborators').exec().then((modpacks) => {
+  return Modpack.find({ owners: mOwner }).populate('owners').populate('contributors').populate('builds').exec().then((modpacks) => {
     // Modpacks found.
     return modpacks
   }).catch((reason) => {
@@ -267,20 +272,20 @@ exports.getModpacksByOwner = (mOwner) => {
   })
 }
 
-exports.getModpacksByCollaborator = (mCollaborator) => {
-  return Modpack.find({ collaborators: mCollaborator }).populate('owners').populate('collaborators').exec().then((modpacks) => {
+exports.getModpacksByContributor = (mContributor) => {
+  return Modpack.find({ contributors: mContributor }).populate('owners').populate('contributors').populate('builds').exec().then((modpacks) => {
     // Modpacks found.
     return modpacks
   }).catch((reason) => {
     // No modpacks found for this collaborator.
-    debug(`ERROR (DB): Failed to find any modpacks with this collaborator because of: ${reason}`)
+    debug(`ERROR (DB): Failed to find any modpacks with this contributor because of: ${reason}`)
     return false
   })
 }
 
 exports.getAllModpacks = () => {
   // Fetch an array of all modpacks
-  return Modpack.find({}).populate('owners').populate('collaborators').exec().then((modpacks) => {
+  return Modpack.find({}).populate('owners').populate('contributors').populate('builds').exec().then((modpacks) => {
     // Modpacks found
     return modpacks
   }).catch((reason) => {
@@ -317,12 +322,36 @@ exports.deleteModpack = (mSlug) => {
 
 // --- Mod-Related Functions ---
 exports.getModBySlug = (mSlug) => {
-  return Mod.findOne({ name: mSlug }).exec().then((mod) => {
-    // Mod found
-    return mod
+  return Mod.find({ name: mSlug }).exec().then((mods) => {
+    if (mods === null || mods.length === 0) {
+      // Mod not found
+      return null
+    } else {
+      // Mod found
+      return {
+        id: mods[0].mod_id,
+        name: mods[0].name,
+        pretty_name: mods[0].pretty_name,
+        author: mods[0].author,
+        description: mods[0].description,
+        link: mods[0].link,
+        versions: mods.map((modVersion) => modVersion['version'])
+      }
+    }
   }).catch((reason) => {
     // No mod found with this slug
     debug(`ERROR (DB): Failed to find a mod with slug '${mSlug}' because of: ${reason}`)
+    return false
+  })
+}
+
+exports.getModVersion = (mSlug, mVersion) => {
+  return Mod.findOne({ name: mSlug, version: mVersion }).exec().then((mod) => {
+    // Mod found
+    return mod
+  }).catch((reason) => {
+    // No mod found with this slug and version
+    debug(`ERROR (DB): Failed to find a mod '${mSlug}:${mVersion}' because of: ${reason}`)
     return false
   })
 }
