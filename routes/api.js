@@ -1,14 +1,25 @@
 const express = require('express')
 const pckg = require('../package.json')
-const branchName = require('current-git-branch')()
+const branchName = require('current-git-branch')() || "release"
 const database = require('../database')
 const router = express.Router()
 
 router.get('/', (req, res) => {
-  res.json({
+  return res.json({
     api: pckg.prettyName,
     version: pckg.version,
-    stream: branchName
+    stream: branchName,
+    meta: {
+      description: "TechnicFlux implementation of Technic's Solder API for retrieval of modpack and mod info.",
+      license: `https://github.com/Zandercraft/TechnicFlux/blob/${branchName}/LICENSE.txt`,
+      repo: "https://github.com/Zandercraft/TechnicFlux",
+      documentation: "https://github.com/Zandercraft/TechnicFlux/wiki",
+      attribution: {
+        name: "Zandercraft",
+        github: "https://github.com/Zandercraft",
+        website: "https://zandercraft.ca",
+      }
+    }
   })
 })
 
@@ -134,20 +145,20 @@ router.get('/verify/:key?', (req, res) => {
   if (api_key !== undefined) {
     if (api_key === process.env?.API_KEY)
       // Key validated
-      res.json({
+      return res.json({
         valid: 'Key validated.',
         name: 'API KEY',
         created_at: 'A long time ago'
       })
     else {
       // Invalid key provided
-      res.json({
+      return res.json({
         error: 'Invalid key provided.'
       })
     }
   } else {
     // No key provided
-    res.json({
+    return res.json({
       error: 'No API key provided.'
     })
   }
@@ -155,7 +166,7 @@ router.get('/verify/:key?', (req, res) => {
 
 /* Invalid API Routes */
 router.all('*', (req, res) => {
-  res.status(405).json({
+  return res.status(405).json({
     code: res.statusCode,
     message: 'Invalid route.'
   })
