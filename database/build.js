@@ -71,3 +71,14 @@ exports.getModpackBuild = (mSlug, bVersion) => {
     return undefined
   })
 }
+
+exports.deleteBuild = (mId) => {
+  return exports.Build.deleteOne({ name: mId }).exec().then(() => {
+    // Successfully deleted this build
+    return true
+  }).catch((reason) => {
+    // Failed to delete the build
+    debug(`ERROR (DB): Failed to delete build '${mId}' because of: ${reason}`)
+    return false
+  })
+}
