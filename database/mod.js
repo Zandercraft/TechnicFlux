@@ -25,8 +25,8 @@ const modSchema = new Schema({
 
 // Handle incremental updates of the mod_id
 modSchema.pre('save', (next) => {
-  let doc = this;
-  database.counter.Counter.findByIdAndUpdate({_id: 'modId'}, {$inc: { seq: 1 }}, (error, counter) => {
+  const doc = this
+  database.counter.Counter.findByIdAndUpdate({ _id: 'modId' }, { $inc: { seq: 1 } }, (error, counter) => {
     if (error) {
       return next(error)
     }

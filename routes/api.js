@@ -150,32 +150,35 @@ router.get('/modpack/:slug/:build?', (req, res) => {
         display_name: modpack.display_name,
         recommended: modpack.recommended,
         latest: modpack.latest,
-        builds: modpack.builds.map((build) => build.version)
+        builds: modpack.builds.map((mBuild) => mBuild.version)
       })
     } else {
       // Modpack build info
-
-      // Build found
-      return res.json({
-        minecraft: '1.20.1',
-        forge: null,
-        java: 17,
-        memory: 2048,
-        mods: [
-          {
-            name: 'examplemod',
-            version: '0.0.1',
-            md5: '51c1305b56249804926e38fcf3e46640',
-            url: 'https://example.com/file.zip',
-            filesize: 0
-          }
-        ]
+      return database.build.getModpackBuild(`${slug}`, `${build}`).then((mBuild) => {
+        if (mBuild !== undefined) {
+          // Build found
+          return res.json({
+            minecraft: mBuild.minecraft,
+            forge: null,
+            java: mBuild.java,
+            memory: mBuild.memory,
+            mods: mBuild.mods.map((mod) => {
+              return {
+                name: mod.name,
+                version: mod.version,
+                md5: mod.md5,
+                url: mod.link,
+                filesize: 0
+              }
+            })
+          })
+        } else {
+          // Build Not Found
+          res.status(404).json({
+            error: 'Build does not exist'
+          })
+        }
       })
-
-      // Build Not Found
-      // res.status(404).json({
-      //   "error": "Build does not exist"
-      // })
     }
   }).catch(() => {
     // Issue with db request

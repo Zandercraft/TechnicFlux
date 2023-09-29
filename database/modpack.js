@@ -1,5 +1,6 @@
 const debug = require('debug')('technicflux:server')
 const mongoose = require('mongoose')
+const database = require('./database')
 const { SchemaTypes } = require('mongoose')
 const Schema = mongoose.Schema
 
@@ -109,5 +110,18 @@ exports.deleteModpack = (mSlug) => {
     // Failed to delete the modpack
     debug(`ERROR (DB): Failed to delete modpack '${mSlug}' because of: ${reason}`)
     return false
+  })
+}
+
+exports.addModpackBuild = (mSlug, bVersion, bMinecraft, bJava, bMemory, bForge) => {
+  return database.build.createBuild(bVersion, bMinecraft, bJava, bMemory, bForge).exec().then((build) => {
+    exports.Modpack.updateOne(
+      { name: mSlug },
+      {
+        $push: {
+          builds: build._id
+        }
+      }
+    )
   })
 }
