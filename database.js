@@ -16,6 +16,13 @@ const userSchema = new Schema({
   login_history: [{ timestamp: Date, userAgent: String }]
 })
 
+const apiKeySchema = new Schema({
+  owner: { type: SchemaTypes.ObjectId, ref: 'technicflux_users' },
+  key: String,
+  name: String,
+  created_at: Date
+})
+
 const modpackSchema = new Schema({
   name: String,
   display_name: String,
@@ -55,6 +62,7 @@ const buildSchema = new Schema({
 
 // --- Models ---
 const User = mongoose.model('technicflux_users', userSchema)
+const APIKey = mongoose.model('technicflux_keys', apiKeySchema)
 const Modpack = mongoose.model('technicflux_modpacks', modpackSchema)
 const Mod = mongoose.model('technicflux_mods', modSchema)
 const Build = mongoose.model('technicflux_builds', buildSchema)
@@ -119,7 +127,7 @@ exports.getUserById = (uId) => {
 }
 
 /*
- * Gets the user with the provided email.
+ * Gets the user with the provided username.
 */
 exports.getUserByUsername = (uUsername) => {
   // Fetch information about the user with the given username
@@ -155,7 +163,7 @@ exports.authUser = (uUsername, uPassword, logHistory = false, uAgent = 'Unknown'
   // Fetch information about the user with the given username
   return User.findOne({ username: uUsername }).exec().then((user) => {
     // User found. Check password.
-    return bcrypt.compare(uPassword, user.password).then((isMatch) => {
+    return bcrypt.compare(uPassword, user.password).then(async (isMatch) => {
       // Check if it is a match
       if (isMatch) {
         // Update the user's login history.
@@ -163,7 +171,7 @@ exports.authUser = (uUsername, uPassword, logHistory = false, uAgent = 'Unknown'
           const newLogin = { timestamp: new Date(), userAgent: String(uAgent) }
 
           // Add the new login to the user's login history
-          return User.updateOne(
+          return await User.updateOne(
             { username: uUsername },
             { $push: { login_history: newLogin } }
           ).exec().then(() => {
@@ -225,6 +233,91 @@ exports.updateUser = (uUsername, object) => {
   }).catch((err) => {
     // Issue creating hashed object salt
     process.stdout.write(`ERROR (while generating password salt): ${err}`)
+    return false
+  })
+}
+
+// --- API-Key-Related Functions
+
+/*
+ * Creates a new api key with the given information.
+*/
+exports.createAPIKey = (kOwner, kKey, kName) => {
+  // Encrypt the password using bcrypt and save user
+  return bcrypt.genSalt(10).then((Salt) => {
+    return bcrypt.hash(kKey, Salt).then((hash) => {
+      // Create an APIKey object
+      const newKey = new APIKey({
+        owner: kOwner,
+        key: hash,
+        name: kName,
+        created_at: new Date()
+      })
+
+      // Commit it to the database
+      return newKey.save().then((key) => {
+        process.stdout.write(`Successfully added new API key '${kName}' for ${kOwner}\n`)
+        return key
+      }).catch((reason) => {
+        process.stdout.write(`ERROR (when saving new API key): ${reason}\n`)
+        return false
+      })
+    }).catch((err) => {
+      // Issue creating hashed api key
+      process.stdout.write(`ERROR (while hashing key): ${err}`)
+      return false
+    })
+  }).catch((err) => {
+    // Issue creating hashed object salt
+    process.stdout.write(`ERROR (while generating api key salt): ${err}`)
+    return false
+  })
+}
+
+/*
+ * Checks if the corresponding password matches that of the provided username.
+*/
+exports.authAPIKey = (uKey) => {
+  // Fetch information about the user with the given username
+  return APIKey.find({ }).exec().then(async (keys) => {
+    // Check if any of the keys match.
+    let valid = [false, undefined]
+    for (const key of keys) {
+      await bcrypt.compare(uKey, key.key).then((isMatch) => {
+        // Check if it is a match
+        if (isMatch) {
+          // The key matched.
+          valid = [true, key]
+        }
+      })
+    }
+    return valid
+  }).catch((reason) => {
+    console.log(reason)
+    // DB error
+    debug('ERROR (DB): Could not fetch API keys.')
+    return [false, undefined]
+  })
+}
+
+exports.getAPIKeysByOwner = (mOwner) => {
+  return APIKey.find({ owner: mOwner }).populate('owner').exec().then((keys) => {
+    // API Keys found.
+    return keys
+  }).catch((reason) => {
+    // No API keys found for this owner.
+    debug(`ERROR (DB): Failed to find any API keys with this owner because of: ${reason}`)
+    return false
+  })
+}
+
+exports.deleteAPIKey = (kId) => {
+  return APIKey.deleteOne({ _id: kId }).exec().then(() => {
+    // Successfully deleted this api key
+    return true
+  }).catch((reason) => {
+    // Failed to delete the api key
+    debug(`ERROR (DB): Failed to delete API Key '${kId}' because of: ${reason}`)
     return false
   })
 }
@@ -335,7 +428,7 @@ exports.getModBySlug = (mSlug) => {
         author: mods[0].author,
         description: mods[0].description,
         link: mods[0].link,
-        versions: mods.map((modVersion) => modVersion['version'])
+        versions: mods.map((modVersion) => modVersion.version)
       }
     }
   }).catch((reason) => {

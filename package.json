@@ -32,7 +32,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "set DEBUG=technicflux:* && node ./bin/www"
+    "start": "set DEBUG=technicflux:* && node ./bin/www",
+    "lint": "standard",
+    "lint-and-fix": "standard --fix"
   },
   "dependencies": {
     "@zip.js/zip.js": "^2.7.29",
@@ -48,6 +50,7 @@
     "mongoose": "^7.5.3",
     "morgan": "~1.9.1",
     "multer": "^1.4.5-lts.1",
+    "rate-limit-mongo": "^2.3.2",
     "standard": "^17.1.0"
   },
   "devDependencies": {

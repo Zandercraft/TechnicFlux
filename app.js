@@ -15,7 +15,7 @@ const storage = multer.diskStorage({
     cb(null, uniquePrefix + '-' + file.originalname)
   }
 })
-const upload = multer({ storage: storage })
+const upload = multer({ storage })
 
 // --- Routers ---
 const indexRouter = require('./routes/index')
@@ -49,7 +49,7 @@ app.use(function (err, req, res, next) {
 
   // render the error page
   res.status(err.status || 500)
-  res.render('error', {title: `Error ${err.status}: ${err.message}`})
+  res.render('error', { title: `Error ${err.status}: ${err.message}` })
 })
 
 module.exports.app = app
