@@ -5,6 +5,27 @@
  */
 require('dotenv').config()
 
+// Check if the .env config file is included.
+const required_variables = [
+    process.env.MONGODB_CONN_STRING,
+    process.env.ADMIN_USER,
+    process.env.ADMIN_PASS,
+    process.env.NAME,
+    process.env.HOST,
+    process.env.API_KEY
+]
+for (let variable of required_variables) {
+  if (variable === undefined) {
+    console.error("ERROR: Configuration error! You are either missing a .env file or have not properly configured all " +
+        "required environment variables.\n" +
+        "Depending on your environment, this may require copying .env.example to .env and modifying the configuration " +
+        "file or defining the missing environment variables (see the .env.example file)." +
+        "\nExiting...")
+    process.exit(1)
+  }
+}
+
+
 
 /**
  * Module dependencies.
