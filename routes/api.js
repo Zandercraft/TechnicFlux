@@ -1,7 +1,7 @@
 const express = require('express')
 const rateLimit = require('express-rate-limit')
 const MongoStore = require('rate-limit-mongo')
-const database = require('../database')
+const database = require('../database/database')
 const branchName = require('current-git-branch')() || 'release'
 const pckg = require('../package.json')
 const router = express.Router()
@@ -67,7 +67,7 @@ router.get('/mod/:modname/:modversion?', (req, res) => {
   const modName = req.params.modname
   const modVersion = req.params?.modversion
 
-  return database.getModBySlug(`${modName}`).then((mod) => {
+  return database.mod.getModBySlug(`${modName}`).then((mod) => {
     // Check if a mod was found
     if (mod === null) {
       // Mod Not Found
@@ -79,7 +79,7 @@ router.get('/mod/:modname/:modversion?', (req, res) => {
       return res.json(mod)
     } else {
       // Request is for a particular version.
-      return database.getModVersion(modName, modVersion).then((version) => {
+      return database.mod.getModVersion(modName, modVersion).then((version) => {
         if (version === null) {
           // Version Not Found
           return res.status(404).json({
@@ -111,7 +111,7 @@ router.get('/mod/:modname/:modversion?', (req, res) => {
  * Purpose: Displays a list of all modpacks that are on this TechnicFlux instance.
  */
 router.get('/modpack', (req, res) => {
-  return database.getAllModpacks().then((modpacks) => {
+  return database.modpack.getAllModpacks().then((modpacks) => {
     // Modpack Index
     return res.json({
       modpacks: (modpacks === null)
@@ -137,7 +137,7 @@ router.get('/modpack/:slug/:build?', (req, res) => {
   const slug = req.params.slug
   const build = req.params?.build
 
-  return database.getModpackBySlug(`${slug}`).then((modpack) => {
+  return database.modpack.getModpackBySlug(`${slug}`).then((modpack) => {
     if (modpack === null) {
       // Modpack Not Found
       return res.status(404).json({
@@ -192,7 +192,7 @@ router.get('/verify/:key?', (req, res) => {
   const apiKey = req.params?.key
 
   if (apiKey !== undefined) {
-    database.authAPIKey(apiKey).then((key) => {
+    database.apiKey.authAPIKey(apiKey).then((key) => {
       if (apiKey === process.env?.API_KEY) {
         // Key validated
         return res.json({

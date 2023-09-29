@@ -34,7 +34,7 @@ for (let variable of required_variables) {
 const app = require('../app').app;
 const debug = require('debug')('technicflux:server');
 const http = require('http');
-const database = require('../database')
+const database = require('../database/database')
 
 /**
  * Get port from environment and store in Express.
