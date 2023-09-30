@@ -2,12 +2,13 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
-.pageContent {
-  padding: 50px;
-}
-
 a {
   color: #00B7FF;
+}
+
+.pageContent {
+  position: relative;
+  min-height: 100vh;
 }
 
 .grecaptcha-badge {

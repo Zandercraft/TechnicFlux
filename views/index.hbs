@@ -13,13 +13,13 @@
                                     {{error}}
                                 </div>
                             {{/if}}
-                            <form id="login-form" method="post" target="/">
+                            <form id="login-form" method="post" action="/">
                                 <div class="form-floating mb-3">
-                                    <input class="form-control" id="inputEmail" type="text" placeholder="name@example.com" />
+                                    <input class="form-control" id="username" minlength="4" maxlength="50" type="text" placeholder="Username" name="username" required />
                                     <label for="inputEmail" class="text-dark">Username</label>
                                 </div>
                                 <div class="form-floating mb-3">
-                                    <input class="form-control" id="inputPassword" type="password" placeholder="Password" />
+                                    <input class="form-control" id="password" type="password" placeholder="Password" name="password" required />
                                     <label for="inputPassword" class="text-dark">Password</label>
                                 </div>
                                 <div class="d-flex align-items-center justify-content-between">
@@ -36,6 +36,22 @@
             </div>
         </div>
     </main>
+</div>
+<div id="layoutError_footer">
+    <footer class="py-4 bg-light mt-auto">
+        <div class="container-fluid px-4">
+            <div class="d-flex align-items-center justify-content-between small">
+                <div class="text-muted">
+                    Copyright &copy; Zandercraft 2023. Distributed under the
+                    <a href="https://github.com/Zandercraft/TechnicFlux/blob/release/LICENSE.txt">MIT License</a>.
+                    <em>We are not affiliated with Mojang, AB or Syndicate LLC.</em>
+                </div>
+                <div>
+                    <a href="https://github.com/Zandercraft/TechnicFlux">TechnicFlux on Github</a>
+                </div>
+            </div>
+        </div>
+    </footer>
 </div>
 
 {{#if captcha}}

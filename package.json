@@ -48,6 +48,7 @@
     "express-rate-limit": "^7.0.2",
     "express-recaptcha": "^5.1.0",
     "express-session": "^1.17.3",
+    "express-validator": "^7.0.1",
     "hbs": "~4.2.0",
     "http-errors": "~1.6.3",
     "mongoose": "^7.5.3",
