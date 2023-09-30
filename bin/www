@@ -7,12 +7,13 @@ require('dotenv').config()
 
 // Check if the .env config file is included.
 const required_variables = [
-    process.env.MONGODB_CONN_STRING,
-    process.env.ADMIN_USER,
-    process.env.ADMIN_PASS,
-    process.env.NAME,
-    process.env.HOST,
-    process.env.API_KEY
+  process.env.MONGODB_CONN_STRING,
+  process.env.ADMIN_USER,
+  process.env.ADMIN_PASS,
+  process.env.NAME,
+  process.env.HOST,
+  process.env.API_KEY,
+  process.env.SESSION_KEY
 ]
 for (let variable of required_variables) {
   if (variable === undefined) {

@@ -4,6 +4,8 @@ const path = require('path')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
 const multer = require('multer')
+const session = require('express-session')
+const MongoStore = require('connect-mongo')
 
 // Setup multer disk-store
 const storage = multer.diskStorage({
@@ -27,9 +29,20 @@ const app = express()
 app.set('views', path.join(__dirname, 'views'))
 app.set('view engine', 'hbs')
 
+// --- Middleware ---
+app.use(session({
+  secret: process.env.SESSION_KEY,
+  saveUninitialized: false,
+  resave: false,
+  store: MongoStore.create({
+    mongoUrl: process.env.MONGODB_CONN_STRING,
+    touchAfter: 24 * 3600,
+    collectionName: "technicflux_sessions"
+  })
+}))
 app.use(logger('dev'))
 app.use(express.json())
-app.use(express.urlencoded({ extended: false }))
+app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 

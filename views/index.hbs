@@ -1,4 +1,53 @@
-<img src="/images/technicflux-logo-white.png" width="108px" height="108px" />
-<h1>{{title}}</h1>
-<p>Welcome to {{title}}!</p>
-<p>The dashboard isn't ready yet. We are currently working on the API and backend stuff.</p>
+<div id="layoutAuthentication_content">
+    <main>
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-5">
+                    <div class="card border-0 rounded-lg mt-5">
+                        <div class="card-header bg-white">
+                            <img class="mx-auto my-5 d-block" src="/images/technicflux-logo.png" width="108px" height="108px"  alt="TechnicFlux logo"/>
+                        </div>
+                        <div class="card-body">
+                            {{#if error}}
+                                <div class="alert alert-danger" role="alert">
+                                    {{error}}
+                                </div>
+                            {{/if}}
+                            <form id="login-form" method="post" target="/">
+                                <div class="form-floating mb-3">
+                                    <input class="form-control" id="inputEmail" type="text" placeholder="name@example.com" />
+                                    <label for="inputEmail" class="text-dark">Username</label>
+                                </div>
+                                <div class="form-floating mb-3">
+                                    <input class="form-control" id="inputPassword" type="password" placeholder="Password" />
+                                    <label for="inputPassword" class="text-dark">Password</label>
+                                </div>
+                                <div class="d-flex align-items-center justify-content-between">
+                                    <button class="btn btn-primary w-100 g-recaptcha"
+                                            data-sitekey="{{site_key}}"
+                                            data-callback="onSubmit"
+                                            data-action="submit"
+                                    >Log In</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+{{#if captcha}}
+    {{{captcha}}}
+    <script>
+        function cb(token) {
+            let input = document.createElement('input')
+            input.setAttribute('type', 'text')
+            input.setAttribute('name', 'g-recaptcha-response')
+            input.setAttribute('value', token)
+            input.setAttribute('hidden', true)
+            document.getElementsByTagName('form')[0].appendChild(input)
+        }
+    </script>
+{{/if}}
